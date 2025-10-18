@@ -1,0 +1,353 @@
+<div class="app-shell">
+  <header class="site-header">
+    <img class="site-logo" src="/logo_full.png" alt="MasHer Webtools" />
+    <button
+      type="button"
+      class="theme-toggle"
+      (click)="toggleTheme()"
+      [attr.aria-label]="themeButtonAriaLabel()"
+    >
+      <span class="theme-toggle__icon" aria-hidden="true">{{ themeIcon() }}</span>
+      <span class="theme-toggle__text">{{ themeButtonText() }}</span>
+    </button>
+  </header>
+
+  <main class="app-main">
+    <div class="app-container flex flex-col gap-10">
+      <section class="app-hero space-y-4">
+        <span class="app-badge inline-flex items-center gap-2 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+          Webtools • Kalkulator Pinjaman
+        </span>
+        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+          Simulasikan pinjaman, dan lihat timeline pelunasannya.
+        </h1>
+        <p class="max-w-3xl text-base text-muted sm:text-lg">
+          Masukkan nilai pokok, tenor, serta opsi bunga atau biaya tambahan. Kalkulator ini menampilkan cicilan bulanan, total bunga,
+          dan sisa pokok untuk metode flat maupun efektif (anuitas).
+        </p>
+      </section>
+
+      <div class="app-grid">
+        <form class="flex flex-col gap-6" [formGroup]="form" novalidate>
+          <section class="surface-card p-6">
+            <header class="mb-5 space-y-2">
+              <h2 class="text-lg font-semibold text-label">Parameter pinjaman</h2>
+              <p class="text-sm text-muted">
+                Nilai rupiah otomatis diformat. Suku bunga dianggap tetap sepanjang tenor.
+              </p>
+            </header>
+
+            <div class="space-y-5">
+              <label class="block space-y-2 text-sm">
+                <span class="font-medium text-label">Jumlah pinjaman</span>
+                <input
+                  #amountField
+                  type="text"
+                  formControlName="amount"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  placeholder="Rp 150.000.000"
+                  class="app-input"
+                  (input)="handleCurrencyInput('amount', $event)"
+                />
+              </label>
+
+              <label class="block space-y-2 text-sm">
+                <span class="font-medium text-label">Suku bunga tahunan (%)</span>
+                <input
+                  type="number"
+                  formControlName="rate"
+                  min="0"
+                  step="0.1"
+                  inputmode="decimal"
+                  placeholder="contoh: 10"
+                  class="app-input"
+                />
+              </label>
+
+              <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr),140px]">
+                <label class="block space-y-2 text-sm">
+                  <span class="font-medium text-label">Tenor pinjaman</span>
+                  <input
+                    type="number"
+                    formControlName="term"
+                    min="0"
+                    step="0.5"
+                    inputmode="decimal"
+                    placeholder="contoh: 5"
+                    class="app-input"
+                  />
+                </label>
+                <label class="block space-y-2 text-sm">
+                  <span class="font-medium text-label">Satuan</span>
+                  <select formControlName="termUnit" class="app-input">
+                    <option value="years">Tahun</option>
+                    <option value="months">Bulan</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <p class="mt-6 text-xs leading-relaxed helper-text">
+              Catatan: biaya provisi atau asuransi belum dihitung otomatis. Gunakan opsi di bawah jika ingin memasukkan biaya administrasi.
+            </p>
+          </section>
+
+          <section class="surface-card surface-card--muted p-6">
+            <h2 class="text-sm font-semibold uppercase tracking-[0.14em] text-soft">Penyesuaian tambahan</h2>
+
+            <div class="option-toggle">
+              <label class="toggle-control">
+                <input type="checkbox" formControlName="includeIntroDiscount" />
+                <span>Aktifkan diskon bunga awal</span>
+              </label>
+              @if (form.controls.includeIntroDiscount.value) {
+                <div class="option-fields">
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <label class="block space-y-2 text-sm">
+                      <span class="font-medium text-label">Diskon bunga awal (% per tahun)</span>
+                      <input
+                        type="number"
+                        formControlName="introDiscountRate"
+                        min="0"
+                        step="0.1"
+                        inputmode="decimal"
+                        placeholder="contoh: 1.5"
+                        class="app-input"
+                      />
+                    </label>
+                    <label class="block space-y-2 text-sm">
+                      <span class="font-medium text-label">Durasi diskon (bulan)</span>
+                      <input
+                        type="number"
+                        formControlName="introDiscountDuration"
+                        min="0"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="contoh: 12"
+                        class="app-input"
+                      />
+                    </label>
+                  </div>
+                  <p class="helper-text text-xs">
+                    Diskon bunga berlaku selama durasi yang ditentukan, lalu kembali ke suku bunga dasar.
+                  </p>
+                </div>
+              }
+            </div>
+
+            <div class="option-toggle">
+              <label class="toggle-control">
+                <input type="checkbox" formControlName="includeProvision" />
+                <span>Aktifkan biaya provisi (persentase)</span>
+              </label>
+              @if (form.controls.includeProvision.value) {
+                <div class="option-fields">
+                  <label class="block space-y-2 text-sm">
+                    <span class="font-medium text-label">Persentase biaya provisi (% dari pinjaman)</span>
+                    <input
+                      type="number"
+                      formControlName="provisionRate"
+                      min="0"
+                      step="0.1"
+                      inputmode="decimal"
+                      placeholder="contoh: 1.5"
+                      class="app-input"
+                    />
+                  </label>
+                  <p class="helper-text text-xs">
+                    Nilai ini akan dipotong dari pencairan di awal, sehingga dana diterima lebih kecil dari pokok pinjaman.
+                  </p>
+                </div>
+              }
+            </div>
+          </section>
+        </form>
+
+        <section class="flex flex-col gap-8">
+          @if (calculation(); as calc) {
+            @if (selectedSummary(); as active) {
+              <article class="surface-card p-6">
+              <header class="summary-header">
+                <div class="summary-header__info">
+                  <h2 class="text-lg font-semibold text-label">Ringkasan pinjaman</h2>
+                  <p class="text-sm text-muted">
+                    Pokok total {{ displayCurrency(calc.principal) }} · {{ calc.months }} bulan ·
+                    {{ calc.annualRate | number:'1.0-2' }}% p.a.
+                  </p>
+                  @if (adjustmentInfo().includeIntroDiscount) {
+                    <p class="helper-text text-xs">
+                      Diskon bunga awal: {{ adjustmentInfo().introDiscountRate | number:'1.0-2' }}% per tahun selama
+                      {{ adjustmentInfo().introDiscountDuration | number:'1.0-0' }} bulan.
+                    </p>
+                  }
+                  @if (adjustmentInfo().netDisbursement !== adjustmentInfo().baseAmount) {
+                    <p class="helper-text text-xs">
+                      Biaya provisi {{ adjustmentInfo().provisionRate | number:'1.0-2' }}% dipotong di awal. Dana dicairkan:
+                      {{ displayCurrency(adjustmentInfo().netDisbursement) }}.
+                    </p>
+                  }
+                </div>
+                <div class="method-toggle summary-method-toggle">
+                  <button
+                    type="button"
+                    class="method-toggle__btn"
+                    [class.is-active]="timelineMethod() === 'flat'"
+                    (click)="setTimelineMethod('flat')"
+                  >
+                    Flat
+                  </button>
+                  <button
+                    type="button"
+                    class="method-toggle__btn"
+                    [class.is-active]="timelineMethod() === 'effective'"
+                    (click)="setTimelineMethod('effective')"
+                  >
+                    Efektif (Anuitas)
+                  </button>
+                </div>
+              </header>
+
+              <div class="metric-card metric-card--accent">
+                <div class="metric-card__header">
+                  <span>{{ methodMeta[active.method].label }}</span>
+                  <span class="metric-card__chip">{{ methodMeta[active.method].chip }}</span>
+                </div>
+                <p class="metric-card__subtitle">
+                  {{ active.method === 'flat' ? 'Cicilan bulanan tetap' : 'Cicilan bulan pertama' }}
+                </p>
+                <p class="metric-card__value">{{ displayCurrency(active.summary.monthlyPayment) }}</p>
+                <dl class="metric-card__list">
+                  <div class="metric-card__row">
+                    <dt>Total bunga</dt>
+                    <dd>{{ displayCurrency(active.summary.totalInterest) }}</dd>
+                  </div>
+                  <div class="metric-card__row">
+                    <dt>Total bayar</dt>
+                    <dd>{{ displayCurrency(active.summary.totalPayment) }}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <p class="summary-note">
+                Bunga efektif menghitung bunga dari sisa pokok berjalan, sedangkan metode flat mengenakan bunga dari pokok awal.
+              </p>
+              <p class="floating-note helper-text text-xs">
+                Suku bunga tahunan merupakan bunga floating dan dapat berubah mengikuti BI rate serta kebijakan kreditur.
+              </p>
+
+              <div class="summary-delta" *ngIf="interestDelta() as delta">
+                @if (delta > 0) {
+                  <span class="savings-positive font-semibold">
+                    Metode efektif menghemat sekitar {{ displayCurrency(delta) }} dibanding metode flat.
+                  </span>
+                } @else if (delta < 0) {
+                  <span class="savings-negative font-semibold">
+                    Metode flat menghemat sekitar {{ displayCurrency(delta * -1) }} dibanding metode efektif.
+                  </span>
+                } @else {
+                  <span class="font-semibold text-label">Total bunga kedua metode identik untuk konfigurasi saat ini.</span>
+                }
+              </div>
+
+              <div class="action-bar">
+                <button type="button" class="action-button" (click)="exportPdf()">Unduh PDF</button>
+                <button type="button" class="action-button" (click)="exportExcel()">Unduh Excel</button>
+              </div>
+              </article>
+            }
+
+            <article class="surface-card p-6">
+              <div class="timeline-header">
+                <div>
+                  <h3 class="text-lg font-semibold text-label">Timeline pembayaran</h3>
+                  <p class="text-sm text-muted">
+                    Visualisasi porsi pokok vs bunga per bulan untuk metode yang dipilih.
+                  </p>
+                </div>
+              </div>
+
+              <div class="legend-list mt-6">
+                <span class="inline-flex items-center gap-2">
+                  <span class="legend-dot legend-dot--principal"></span>
+                  Pokok
+                </span>
+                <span class="inline-flex items-center gap-2">
+                  <span class="legend-dot legend-dot--interest"></span>
+                  Bunga
+                </span>
+              </div>
+              <p class="helper-text text-xs mt-2">
+                Baris bertanda “Promo” menandakan cicilan dengan diskon bunga awal.
+              </p>
+
+              <div class="table-wrapper mt-4">
+                <div class="table-scroll">
+                  <table class="table-surface">
+                    <thead>
+                      <tr>
+                        <th>Bulan</th>
+                        <th>Cicilan</th>
+                        <th>Rincian</th>
+                        <th class="text-right">Sisa pokok</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (entry of viewedSchedule(); track entry.month) {
+                        <tr [class.discount-row]="entry.isIntroDiscount">
+                          <td class="text-muted">
+                            Bulan {{ entry.month }}
+                            <span class="discount-badge" *ngIf="entry.isIntroDiscount">Promo</span>
+                          </td>
+                          <td class="font-semibold">
+                            {{ displayCurrency(entry.payment) }}
+                          </td>
+                          <td>
+                            <div class="flex flex-col gap-2">
+                              <div class="flex items-center justify-between text-xs text-muted">
+                                <span>Pokok</span>
+                                <span>{{ displayCurrency(entry.principal) }}</span>
+                              </div>
+                              <div class="flex items-center justify-between text-xs text-muted">
+                                <span>Bunga</span>
+                                <span>{{ displayCurrency(entry.interest) }}</span>
+                              </div>
+                              <div class="progress-track">
+                                <span
+                                  class="progress-track__principal"
+                                  [style.width.%]="entry.principalRatio * 100"
+                                ></span>
+                                <span
+                                  class="progress-track__interest"
+                                  [style.width.%]="entry.interestRatio * 100"
+                                ></span>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="text-right font-medium">
+                            {{ displayCurrency(entry.balance) }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </article>
+          } @else {
+            <article class="surface-card surface-card--muted p-10 text-center">
+              <h2 class="text-xl font-semibold text-label">Masukkan parameter pinjaman</h2>
+              <p class="mt-3 text-sm text-muted">
+                Kami akan menampilkan cicilan dan timeline pembayaran begitu pokok, bunga, dan tenor terisi.
+              </p>
+            </article>
+          }
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <span>© {{ currentYear }} Masher. All rights reserved.</span>
+  </footer>
+</div>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Webtools calculator icon">
+  <defs>
+    <linearGradient id="panel" x1="12" y1="8" x2="52" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1f2937" />
+      <stop offset="1" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#panel)" />
+  <rect x="16" y="12" width="32" height="40" rx="8" fill="none" stroke="#38bdf8" stroke-width="4" />
+  <rect x="20" y="16" width="24" height="10" rx="3" fill="#38bdf8" />
+  <g fill="#e2e8f0">
+    <rect x="20" y="30" width="8" height="8" rx="2" />
+    <rect x="32" y="30" width="8" height="8" rx="2" />
+    <rect x="20" y="40" width="8" height="8" rx="2" />
+  </g>
+  <g stroke="#f8fafc" stroke-width="3" stroke-linecap="round">
+    <path d="M38 44h10" />
+    <path d="M43 39v10" />
+  </g>
+  <style>
+    @media (prefers-color-scheme: light) {
+      rect[fill^="url"] { fill: #f3f4f6; }
+      rect[stroke] { stroke: #1f2937; }
+      rect[fill="#38bdf8"] { fill: #2563eb; }
+      g[fill] rect { fill: #1f2937; }
+      g[stroke] path { stroke: #1f2937; }
+    }
+  </style>
+</svg>
