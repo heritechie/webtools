@@ -110,6 +110,11 @@
     padding: 16px 24px 0;
   }
 
+  .site-logo-link {
+    display: inline-flex;
+    align-items: center;
+  }
+
   .site-logo {
     height: 36px;
     width: auto;
