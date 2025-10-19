@@ -1,6 +1,6 @@
 # Webtools
 
-Koleksi utilitas web ringan yang dibuat untuk mendukung eksperimen, debugging, dan pekerjaan sehari-hari di ekosistem MasHer. Setiap tool dibangun sebagai aplikasi kecil yang berjalan sepenuhnya di browser tanpa backend, sehingga aman dipakai bahkan di jaringan terbatas.
+Koleksi utilitas web ringan yang dibuat untuk mendukung eksperimen, debugging, dan pekerjaan sehari-hari di ekosistem Masher. Setiap tool dibangun sebagai aplikasi kecil yang berjalan sepenuhnya di browser tanpa backend, sehingga aman dipakai bahkan di jaringan terbatas.
 
 ## Proyek Saat Ini
 
