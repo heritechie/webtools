@@ -1,59 +1,63 @@
-# KalkulatorPinjaman
+# Kalkulator Pinjaman
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.6.
+Kalkulator cicilan berbasis web yang dipakai di webtools Masher untuk membandingkan metode flat dan efektif (anuitas). Aplikasi ini menampilkan ringkasan biaya pinjaman, timeline amortisasi interaktif, serta menyediakan ekspor PDF atau Excel untuk dibagikan ke rekan kerja maupun nasabah.
 
-## Development server
+## Fitur Utama
 
-To start a local development server, run:
+- Perbandingan dua skenario sekaligus (flat vs efektif) dengan ringkasan biaya yang mudah dibaca.
+- Dukungan opsi diskon suku bunga awal, biaya provisi, serta pilihan durasi pinjaman dalam bulan atau tahun.
+- Timeline pembayaran interaktif lengkap dengan proporsi pokok/bunga dan highlight diskon intro rate.
+- Ekspor laporan ke PDF menggunakan `jspdf`/`jspdf-autotable` atau Excel (`xlsx`).
+- Tampilan responsif dengan toggle tema gelap/terang yang tersimpan di localStorage.
+- Seluruh perhitungan berjalan di browser (tidak ada backend maupun pelacakan data).
 
-```bash
-ng serve
-```
+## Teknologi
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Framework**: Angular 20 dengan Signals dan Reactive Forms.
+- **UI**: Tailwind CSS + utilitas custom.
+- **Build Tooling**: Angular CLI (@angular/build) & pnpm.
+- **Ekspor Dokumen**: `jspdf`, `jspdf-autotable`, `xlsx`.
+- **Deployment Target**: Cloudflare Pages (melalui proxy dari situs utama MasHer).
 
-## Code scaffolding
+## Prasyarat
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+- Node.js v18 atau lebih baru.
+- pnpm (direkomendasikan, sudah dideklarasikan pada `packageManager`).
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Menjalankan Secara Lokal
 
 ```bash
-ng build
+pnpm install
+pnpm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Aplikasi akan tersedia di `http://localhost:4200/` dan otomatis melakukan reload saat berkas sumber diubah.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Skrip Penting
 
 ```bash
-ng test
+pnpm start   # Menjalankan dev server Angular
+pnpm build   # Build produksi ke folder dist/
+pnpm watch   # Build development dengan watch mode
+pnpm test    # Menjalankan unit test Karma + Jasmine
 ```
 
-## Running end-to-end tests
+## Struktur Direktori
 
-For end-to-end (e2e) testing, run:
+- `src/app/` – Komponen utama, logika perhitungan, dan utilitas ekspor dokumen.
+- `src/assets/` – Aset statis.
+- `public/` – Berkas statis yang ikut dibundel apa adanya.
+- `dist/` – Output build produksi.
+
+## Build & Deploy
 
 ```bash
-ng e2e
+pnpm build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Folder `dist/` hasil build dicadangkan untuk di-push ke Cloudflare Pages. Situs utama (`masher.my.id`) melakukan proxy ke build ini melalui Cloudflare Pages Function.
 
-## Additional Resources
+## Catatan Tambahan
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Perhitungan bekerja penuh di client; validasi input dilakukan melalui Angular Reactive Forms.
+- Jika menambahkan dependensi baru, jalankan `pnpm install` agar lockfile tetap sinkron dengan deklarasi `packageManager`.
