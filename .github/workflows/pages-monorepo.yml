@@ -1,0 +1,45 @@
+name: Deploy per subdir (Cloudflare Pages)
+
+on:
+  push:
+    branches: [ main ]
+    # Optional top-level filter (keeps CI quiet on unrelated paths)
+    paths:
+      - 'kalkulator-pinjaman/**'
+      - 'kalender-nasional/**'
+      - '.github/workflows/**'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      kalkulator: ${{ steps.filter.outputs.kalkulator }}
+      kalender:   ${{ steps.filter.outputs.kalender }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            kalkulator:
+              - 'kalkulator-pinjaman/**'
+            kalender:
+              - 'kalender-nasional/**'
+
+  deploy-kalkulator:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.kalkulator == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages (kalkulator-pinjaman)
+        run: curl -X POST "${{ secrets.CF_PAGES_HOOK_KALKULATOR }}"
+
+  deploy-kalender:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.kalender == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages (kalender-nasional)
+        run: curl -X POST "${{ secrets.CF_PAGES_HOOK_KALENDER }}"
