@@ -6,6 +6,8 @@ Koleksi utilitas web ringan yang dibuat untuk mendukung eksperimen, debugging, d
 
 - [`kalkulator-pinjaman/`](./kalkulator-pinjaman/)  
   Simulator cicilan dengan perbandingan metode flat vs efektif (anuitas), dukungan skenario diskon bunga, biaya provisi, serta ekspor PDF/Excel.
+- [`kalender-nasional/`](./kalender-nasional/)  
+  Kalender libur nasional interaktif dengan ringkasan bulanan, tampilan kalender detail per bulan, dan data libur yang bisa diperbarui sesuai Keputusan Bersama Menteri.
 
 ## Cara Kerja
 
