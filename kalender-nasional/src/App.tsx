@@ -139,9 +139,12 @@ export default function App() {
           </section>
 
           <section className="app-grid">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-main">Ringkasan Bulanan</h2>
+            <div className="surface-card surface-card--muted flex flex-col gap-6 p-6">
+              <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.2em] text-muted">Ringkasan Bulanan</p>
+                  <h2 className="text-xl font-semibold text-main">{activeYear}</h2>
+                </div>
                 <label className="flex items-center gap-3 rounded-xl border border-glass bg-surface-highlight px-4 py-2 text-sm text-main">
                   Tahun
                   <select
@@ -156,8 +159,9 @@ export default function App() {
                     ))}
                   </select>
                 </label>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
+              </header>
+
+              <div className="grid gap-3 xl:grid-cols-2">
                 {monthSummaries.map((summary) => {
                   const upcoming = summary.holidays[0];
                   const isActive = summary.month === selectedMonth;
@@ -166,7 +170,7 @@ export default function App() {
                       key={`${activeYear}-${summary.month}`}
                       type="button"
                       onClick={() => setSelectedMonth(summary.month)}
-                      className={`group flex flex-col gap-3 rounded-2xl border p-4 text-left transition-all ${
+                      className={`group flex w-full flex-col gap-3 rounded-2xl border p-4 text-left transition-all ${
                         isActive
                           ? 'border-accent-blue bg-surface-highlight shadow-lg shadow-accent-blue/20'
                           : 'border-glass bg-surface-card hover:border-accent-blue/60 hover:shadow-md hover:shadow-accent-blue/10'
@@ -197,6 +201,7 @@ export default function App() {
                   );
                 })}
               </div>
+
               <p className="text-xs text-faint">
                 <i>
                   *Data libur resmi 2025 masih menunggu Keputusan Presiden. Data akan diperbarui setelah
