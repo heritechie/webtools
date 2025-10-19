@@ -111,6 +111,7 @@ export default function App() {
         <a className="site-logo-link" href="/webtools" aria-label="MasHer Webtools">
           <img className="site-logo" src="/logo_full.png" alt="MasHer Webtools" />
         </a>
+        <span className="app-badge">Webtools • Kalender Nasional</span>
         <button
           type="button"
           className="theme-toggle"
@@ -126,20 +127,8 @@ export default function App() {
 
       <main className="app-main">
         <div className="app-container">
-          <section className="space-y-4">
-            <span className="app-badge">Webtools • Kalender Nasional</span>
-            <h1 className="font-display text-3xl font-semibold text-main sm:text-4xl">
-              Kalender Libur Nasional Indonesia
-            </h1>
-            <p className="max-w-2xl text-base text-soft">
-              Temukan ringkasan cepat hari libur nasional dan cuti bersama yang dirilis pemerintah.
-              Setiap bulan dirangkum dalam kartu, lengkap dengan kalender detail beserta deskripsi
-              libur saat Anda membukanya.
-            </p>
-          </section>
-
           <section className="flex flex-col gap-6">
-            <div className="surface-card surface-card--muted flex flex-col gap-6 p-6">
+            <section className="flex flex-col gap-4">
               <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm uppercase tracking-[0.2em] text-muted">Ringkasan Bulanan</p>
@@ -161,45 +150,45 @@ export default function App() {
                 </label>
               </header>
 
-              <div className="grid gap-3 xl:grid-cols-2">
-                {monthSummaries.map((summary) => {
-                  const upcoming = summary.holidays[0];
-                  const isActive = summary.month === selectedMonth;
-                  return (
-                    <button
-                      key={`${activeYear}-${summary.month}`}
-                      type="button"
-                      onClick={() => setSelectedMonth(summary.month)}
-                      className={`group flex w-full flex-col gap-3 rounded-2xl border p-4 text-left transition-all ${
-                        isActive
-                          ? 'border-accent-blue bg-surface-highlight shadow-lg shadow-accent-blue/20'
-                          : 'border-glass bg-surface-card hover:border-accent-blue/60 hover:shadow-md hover:shadow-accent-blue/10'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm uppercase tracking-[0.3em] text-muted">
-                          {summary.label}
-                        </p>
-                        <span className="rounded-full bg-accent-blue/10 px-3 py-1 text-xs font-semibold text-accent-blue">
-                          {summary.holidays.length} libur
-                        </span>
-                      </div>
-                      {upcoming ? (
-                        <div className="space-y-1">
-                          <p className="text-base font-semibold text-main">{upcoming.name}</p>
-                          <p className="text-xs text-muted">
-                            {new Date(upcoming.date).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'long',
-                            })}
-                          </p>
+              <div className="summary-slider">
+                <div className="summary-slider__track">
+                  {monthSummaries.map((summary) => {
+                    const upcoming = summary.holidays[0];
+                    const isActive = summary.month === selectedMonth;
+                    return (
+                      <button
+                        key={`${activeYear}-${summary.month}`}
+                        type="button"
+                        onClick={() => setSelectedMonth(summary.month)}
+                        className={`summary-card ${
+                          isActive
+                            ? 'summary-card--active'
+                            : 'summary-card--inactive'
+                        }`}
+                      >
+                        <div className="summary-card__header">
+                          <p className="summary-card__label">{summary.label}</p>
+                          <span className="summary-card__badge">
+                            {summary.holidays.length} libur
+                          </span>
                         </div>
-                      ) : (
-                        <p className="text-sm text-muted">Tidak ada libur nasional.</p>
-                      )}
-                    </button>
-                  );
-                })}
+                        {upcoming ? (
+                          <div className="summary-card__body">
+                            <p className="summary-card__title">{upcoming.name}</p>
+                            <p className="summary-card__date">
+                              {new Date(upcoming.date).toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'long',
+                              })}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="summary-card__empty">Tidak ada libur nasional.</p>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               <p className="text-xs text-faint">
@@ -208,7 +197,7 @@ export default function App() {
                   dokumen resmi diterbitkan.
                 </i>
               </p>
-            </div>
+            </section>
 
             <div className="flex flex-col gap-4 rounded-2xl border border-glass bg-surface-card p-6 shadow-inner shadow-black/20">
               <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
