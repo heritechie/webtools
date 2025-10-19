@@ -178,24 +178,6 @@
 		background: var(--surface-alt);
 	}
 
-	.app-grid {
-		display: grid;
-		gap: 24px;
-		align-items: start;
-	}
-
-	@media (min-width: 1280px) {
-		.app-grid {
-			grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
-		}
-	}
-
-	@media (min-width: 1600px) {
-		.app-grid {
-			grid-template-columns: minmax(0, 460px) minmax(0, 1.15fr);
-		}
-	}
-
 	.site-footer {
 		width: min(1120px, calc(100% - 32px));
 		margin: 0 auto 40px;

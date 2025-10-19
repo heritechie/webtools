@@ -138,7 +138,7 @@ export default function App() {
             </p>
           </section>
 
-          <section className="app-grid">
+          <section className="flex flex-col gap-6">
             <div className="surface-card surface-card--muted flex flex-col gap-6 p-6">
               <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
