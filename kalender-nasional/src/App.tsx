@@ -64,6 +64,13 @@ export default function App() {
 	);
 
   const sliderTrackRef = useRef<HTMLDivElement | null>(null);
+  const orderedSummaries = useMemo(() => {
+    const currentIndex = monthSummaries.findIndex((summary) => summary.month === selectedMonth);
+    if (currentIndex <= 0) {
+      return monthSummaries;
+    }
+    return [...monthSummaries.slice(currentIndex), ...monthSummaries.slice(0, currentIndex)];
+  }, [monthSummaries, selectedMonth]);
 
 	useEffect(() => {
 		setSelectedMonth((previous) => {
@@ -174,7 +181,7 @@ export default function App() {
 
               <div className="summary-slider">
                 <div className="summary-slider__track" ref={sliderTrackRef}>
-                  {monthSummaries.map((summary) => {
+                  {orderedSummaries.map((summary) => {
                     const upcoming = summary.holidays[0];
                     const isActive = summary.month === selectedMonth;
                     return (
