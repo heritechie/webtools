@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AVAILABLE_YEARS, HOLIDAYS, type Holiday } from './data/holidays';
 import {
 	buildMonthCalendar,
@@ -63,6 +63,8 @@ export default function App() {
 		resolveInitialMonth(activeYear, monthSummaries),
 	);
 
+  const sliderTrackRef = useRef<HTMLDivElement | null>(null);
+
 	useEffect(() => {
 		setSelectedMonth((previous) => {
 			const stillValid = monthSummaries.some((summary) => summary.month === previous);
@@ -70,6 +72,26 @@ export default function App() {
 			return resolveInitialMonth(activeYear, monthSummaries);
 		});
 	}, [activeYear, monthSummaries]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const track = sliderTrackRef.current;
+    if (!track) {
+      return;
+    }
+    const activeElement = track.querySelector<HTMLElement>(`[data-month="${selectedMonth}"]`);
+    if (!activeElement) {
+      return;
+    }
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    activeElement.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    });
+  }, [selectedMonth, monthSummaries]);
 
   const calendar = useMemo(() => {
     if (!Number.isInteger(selectedMonth)) {
@@ -151,7 +173,7 @@ export default function App() {
               </header>
 
               <div className="summary-slider">
-                <div className="summary-slider__track">
+                <div className="summary-slider__track" ref={sliderTrackRef}>
                   {monthSummaries.map((summary) => {
                     const upcoming = summary.holidays[0];
                     const isActive = summary.month === selectedMonth;
@@ -160,6 +182,7 @@ export default function App() {
                         key={`${activeYear}-${summary.month}`}
                         type="button"
                         onClick={() => setSelectedMonth(summary.month)}
+                        data-month={summary.month}
                         className={`summary-card ${
                           isActive
                             ? 'summary-card--active'
