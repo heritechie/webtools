@@ -1,114 +1,120 @@
-import type { Holiday } from '../data/holidays';
+import type { Holiday } from "../data/holidays";
+import { parseISODateLocal } from "../utils/date";
 
-const WEEK_DAYS = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as const;
+export type CalendarCell = {
+  date: string; // "YYYY-MM-DD"
+  day: number; // 1..31
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  holiday?: Holiday;
+};
 
-export type WeekdayLabel = (typeof WEEK_DAYS)[number];
+export type MonthCalendar = {
+  month: number; // 0..11
+  label: string; // e.g. "Oktober"
+  holidays: Holiday[];
+  weeks: CalendarCell[][];
+};
 
-export interface CalendarCell {
-	date: string;
-	day: number;
-	isCurrentMonth: boolean;
-	isToday: boolean;
-	holiday?: Holiday;
+// Awal minggu: 0=Minggu, 1=Senin (Indonesia umumnya Senin)
+const START_ON: 0 | 1 = 1;
+
+const MONTH_LABELS = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
+export function getMonthLabel(m: number) {
+  return MONTH_LABELS[m] ?? "";
 }
 
-export interface MonthSummary {
-	month: number; // 0-based
-	label: string;
-	holidays: Holiday[];
+export function listWeekdays(): string[] {
+  // label singkat konsisten dengan START_ON
+  const sunFirst = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"]; // Minggu duluan
+  const monFirst = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"]; // Senin duluan
+  return START_ON === 1 ? monFirst : sunFirst;
 }
 
-export interface MonthCalendar {
-	month: number;
-	label: string;
-	weeks: CalendarCell[][];
-	holidays: Holiday[];
+function toISO(y: number, m: number, d: number) {
+  const mm = String(m + 1).padStart(2, "0");
+  const dd = String(d).padStart(2, "0");
+  return `${y}-${mm}-${dd}`;
 }
 
-const monthFormatter = new Intl.DateTimeFormat('id-ID', { month: 'long' });
-
-export const getMonthLabel = (monthIndex: number) =>
-	monthFormatter.format(new Date(2000, monthIndex, 1));
-
-export const listWeekdays = (): WeekdayLabel[] => [...WEEK_DAYS];
-
-export function groupHolidaysByMonth(holidays: Holiday[]): Map<number, Holiday[]> {
-	const map = new Map<number, Holiday[]>();
-	for (const holiday of holidays) {
-		const month = new Date(holiday.date).getMonth();
-		const current = map.get(month) ?? [];
-		current.push(holiday);
-		map.set(month, current);
-	}
-	return map;
+function columnIndex(jsDay: number) {
+  // jsDay: 0=Sun..6=Sat; geser agar Senin bisa jadi kolom 0
+  return (jsDay - START_ON + 7) % 7;
 }
 
-export function buildMonthSummaries(holidays: Holiday[]): MonthSummary[] {
-	const grouped = groupHolidaysByMonth(holidays);
-	return Array.from({ length: 12 }, (_, month) => ({
-		month,
-		label: getMonthLabel(month),
-		holidays: grouped.get(month)?.sort((a, b) => a.date.localeCompare(b.date)) ?? [],
-	}));
+function isTodayLocal(y: number, m: number, d: number) {
+  const now = new Date();
+  return now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
 }
 
-const toMondayIndex = (day: number) => (day + 6) % 7;
+function mapHolidaysByISO(holidays: Holiday[]) {
+  const map = new Map<string, Holiday>();
+  for (const h of holidays) map.set(h.date, h);
+  return map;
+}
 
-export function buildMonthCalendar(year: number, month: number, holidays: Holiday[]): MonthCalendar {
-	const monthLabel = getMonthLabel(month);
-	const firstDay = new Date(year, month, 1);
-	const daysInMonth = new Date(year, month + 1, 0).getDate();
-	const offset = toMondayIndex(firstDay.getDay());
-	const todayISO = new Date().toISOString().slice(0, 10);
+export function buildMonthCalendar(
+  year: number,
+  month: number,
+  holidays: Holiday[] = []
+): MonthCalendar {
+  const holidayMap = mapHolidaysByISO(holidays);
 
-	const cells: CalendarCell[] = [];
+  const firstOfMonth = new Date(year, month, 1);
+  const firstCol = columnIndex(firstOfMonth.getDay());
 
-	// Leading empty cells
-	for (let i = 0; i < offset; i += 1) {
-		const date = new Date(year, month, i - offset + 1);
-		cells.push({
-			date: date.toISOString().slice(0, 10),
-			day: date.getDate(),
-			isCurrentMonth: false,
-			isToday: false,
-		});
-	}
+  // tanggal pertama grid (bisa mundur ke bulan sebelumnya)
+  const gridStart = new Date(year, month, 1 - firstCol);
 
-	for (let day = 1; day <= daysInMonth; day += 1) {
-		const date = new Date(year, month, day);
-		const iso = date.toISOString().slice(0, 10);
-		const holiday = holidays.find((item) => item.date === iso);
-		cells.push({
-			date: iso,
-			day,
-			isCurrentMonth: true,
-			isToday: iso === todayISO,
-			holiday,
-		});
-	}
+  const weeks: CalendarCell[][] = [];
+  const cursor = new Date(gridStart);
 
-	// Trailing cells to complete the last week
-	while (cells.length % 7 !== 0) {
-		const last = cells[cells.length - 1];
-		const date = new Date(last.date);
-		date.setDate(date.getDate() + 1);
-		cells.push({
-			date: date.toISOString().slice(0, 10),
-			day: date.getDate(),
-			isCurrentMonth: false,
-			isToday: false,
-		});
-	}
+  for (let w = 0; w < 6; w++) {
+    const row: CalendarCell[] = [];
+    for (let c = 0; c < 7; c++) {
+      const y = cursor.getFullYear();
+      const m = cursor.getMonth();
+      const d = cursor.getDate();
 
-	const weeks: CalendarCell[][] = [];
-	for (let i = 0; i < cells.length; i += 7) {
-		weeks.push(cells.slice(i, i + 7));
-	}
+      const iso = toISO(y, m, d);
+      const inCurrent = m === month;
 
-	return {
-		month,
-		label: monthLabel,
-		weeks,
-		holidays,
-	};
+      row.push({
+        date: iso,
+        day: d,
+        isCurrentMonth: inCurrent,
+        isToday: isTodayLocal(y, m, d),
+        holiday: holidayMap.get(iso),
+      });
+
+      cursor.setDate(d + 1);
+    }
+    weeks.push(row);
+  }
+
+  // hanya libur di bulan aktif untuk panel
+  const holidaysThisMonth = holidays.filter(
+    (h) => parseISODateLocal(h.date).getMonth() === month
+  );
+
+  return {
+    month,
+    label: getMonthLabel(month),
+    holidays: holidaysThisMonth,
+    weeks,
+  };
 }
